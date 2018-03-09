@@ -4,7 +4,7 @@ NAME=wheel
 PIDFILE=/var/run/$NAME.pid
 CONFIG=/etc/$NAME/$NAME.conf
 DAEMON=/usr/bin/$NAME
-
+TEMPFILE=/tmp/$NAME
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
@@ -14,6 +14,7 @@ start () {
 	if [ $# != 0 ] 
 	then 
 		DAEMON_OPT="${DAEMON_OPT} ${1}"
+		echo "${1}" > $TEMPFILE
 	fi
 	start-stop-daemon --name $NAME --background --quiet --start --make-pidfile --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPT
 }
@@ -22,6 +23,7 @@ stop () {
 	echo -n "Stopping $NAME \n"
 	start-stop-daemon --stop --quiet --pidfile $PIDFILE --signal TERM --oknodo
 	rm -f $PIDFILE
+	rm -f $TEMPFILE
 }
 
 case $1 in
@@ -49,9 +51,10 @@ case $1 in
 	;;
 	
 	status)
-		result=$(ps -ax | grep $NAME)
-		set -- $result
-		echo $7
+		if [ -e $TEMPFILE ]; then
+			STAT=$(cat $TEMPFILE)
+			echo "${STAT}"
+		fi
 	;;
 	
 	*)
