@@ -11,9 +11,9 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 start () {
 	echo -n "Starting $NAME \n"
 	DAEMON_OPT=$CONFIG
-	if [ -n ${1}] 
+	if [ $# != 0 ] 
 	then 
-		DAEMON_OPT="${DAEMON_OPT} $1"
+		DAEMON_OPT="${DAEMON_OPT} ${1}"
 	fi
 	start-stop-daemon --name $NAME --background --quiet --start --make-pidfile --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPT
 }
@@ -47,9 +47,15 @@ case $1 in
 			start $2
 		fi
 	;;
-
+	
+	status)
+		result=$(ps -ax | grep $NAME)
+		set -- $result
+		echo $7
+	;;
+	
 	*)
-		echo "Usage: $NAME {start|stop|restart}"
+		echo "Usage: $NAME {start|stop|restart|status}"
 	exit 1
 
 esac
